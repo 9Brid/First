@@ -1,4 +1,10 @@
 package test2.han03;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 /**
 需要把一个9 ×9的数独补充完整，使得图中每行、每列、每个3 ×3的九宫格内数字1~9均恰好出现一次。
 
@@ -25,5 +31,127 @@ row[N], col[N], cell[3][3]分别用于记录每一行、每一列、每一个九
 用bitset能得到正确答案，代码也短很多，即使加上map[]小抄（这个表格是为了提速，直接有相应函数count()故不需要ones[]小抄），但还是会超时。
 */
 public class Q01 {
+    static int N = 9, M = 1 << N;
+    static int[] ones = new int[M];
+    static int[] map  = new int[M];
+    static int[] row  = new int[N], col = new int[N];
+    static int[][] cell = new int[3][3];
+    static char[] str = new char[100];
 
+    private static void init() {
+        for (int i = 0; i < N; i++) {
+            row[i] = col[i] = (i << N) - 1;
+        }
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                cell[i][j] = (1 << N) - 1;
+            }
+        }
+        for (int i = 0; i < N; i++) {
+            map[1 << i] = i;
+        }
+        for (int i = 0; i < (1 << N); i++) {
+            int cnt = 0;
+            for (int j = i; j != 0 ; j -= lowit(j)) {
+                cnt++;
+            }
+            ones[i] = cnt;
+        }
+    }
+
+    private static int lowit(int x) {
+        return x & -x;
+    }
+
+    private static int find(int x, int y) {
+        return row[x] & col[y] & cell[x/3][y/3];
+    }
+
+    private static boolean dfs(int num) {
+        if (num == 0) {
+            return true;
+        }
+
+        int minx = N, x = 0, y = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if(str[i * N + j] == '.') {
+                    int t = ones[find(i, j)];
+                    if(t < minx) {
+                        minx = t;
+                        x = i;
+                        y = j;
+                    }
+                }
+            }
+        }
+
+        int w = find(x, y);
+        for (int i = w; i != 0; i -= lowit(i)) {
+            int j = map[lowit(i)];
+            str[x * 9 + y] = (char) (j + '1');
+            row[x] -= (1 << j);
+            col[y] -= (1 << j);
+            cell[x / 3][y / 3] -= (1 << j);
+            if (dfs(num - 1)) {
+                return true;
+            }
+            str[x * 9 + y] = '.';
+            row[x] += (1 << j);
+            col[y] += (1 << j);
+            cell[x / 3][y / 3] += (1 << j);
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        try {
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("./src/han03/q01.txt"));
+            System.setIn(bufferedInputStream);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            str = scanner.next().toCharArray();
+            if(str[0] == 'c') {
+                break;
+            }
+            System.out.println(String.valueOf(str));
+            init();
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    System.out.print(str[i * N + j] + " ");
+                }
+                System.out.println();
+            }
+
+            int num = 0;
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    if(str[i * N + j] != '.') {
+                        int t = str[i * N + j] - '1';
+                        row[i] -= (1 << t);
+                        col[i] -= (1 << t);
+                        cell[i/3][j/3] -= (1 << t);
+                    } else {
+                        num++;
+                    }
+                }
+            }
+
+            dfs(num);
+
+            System.out.println(String.valueOf(str));
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    System.out.print(str[i * N + j] + " ");
+                }
+                System.out.println();
+            }
+            System.out.println("----------------------------------------------------");
+        }
+        scanner.close();
+    }
 }

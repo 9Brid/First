@@ -49,7 +49,7 @@ public class Q02_丐帮打狗棒拼接 {
             System.out.println(len);
         }
     }
-
+//u代表第几根木棒，cur代表当前长度，start代表数组下标
     private static boolean dfs(int u, int cur, int start) {
         if (u == cnt) return true;
         if (cur == len) return (dfs(u + 1, 0, 0));

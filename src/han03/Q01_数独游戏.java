@@ -40,7 +40,7 @@ public class Q01_数独游戏 {
     static int[] map = new int[M];
     static int[] row = new int[N], col = new int[N];
     static int[][] cell = new int[3][3];
-    static char[] str = new char[100];
+    static char[]  str = new char[100];
 
     static void init() {
         //二进制中的用1表示未用,用0表示已用方便后面&运算
@@ -76,6 +76,7 @@ public class Q01_数独游戏 {
         }
     }
 
+    //内联函数，减少函数调用的时间。取x的二进制数最右边的1和它右边的所有0，对于lowbit(二进制数110010000) = 二进制数10000，lowbit(二进制数1100100) = 二进制数100
     private static int lowbit(int x) {
         return x & -x;
     }
@@ -94,6 +95,7 @@ public class Q01_数独游戏 {
             if (str[0] == 'e') {
                 break;
             }
+            //String.valueOf:返回的 char数组参数的字符串表示形式。
             System.out.println(String.valueOf(str));
 
             init();//初始化
@@ -111,7 +113,7 @@ public class Q01_数独游戏 {
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
                     if (str[i * 9 + j] != '.') {
-                        int t = str[i * 9 + j] - '1';
+                        int t = str[i * 9 + j] - '1';           //把（i, j）处的字符'1'~'9'转换成数字0~8，并更新三个状态数组
                         row[i] -= (1 << t);
                         col[j] -= (1 << t);
                         cell[i / 3][j / 3] -= (1 << t);
